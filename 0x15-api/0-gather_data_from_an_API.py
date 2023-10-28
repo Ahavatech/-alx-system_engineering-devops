@@ -1,35 +1,27 @@
 #!/usr/bin/python3
-"""
-A script that accesses a REST API for employees' todo lists.
-"""
-
+'''
+Python script that returns information using a REST API
+'''
 import requests
-import sys
+from sys import argv
 
-
-if __name__ == '__main__':
-    employeeId = sys.argv[1]
-    baseUrl = "https://jsonplaceholder.typicode.com/users"
-    employeeUrl = '{}/{}'.format(baseUrl, employeeId)
-
-    response = requests.get(employeeUrl)
-    employeeName = response.json().get('name')
-
-    todosUrl = '{}/todos'.format(employeeUrl)
-    todosResponse = requests.get(todosUrl)
-    todosItems = todosResponse.json()
-
-    doneLists = []
-    done = 0
-
-    for item in todosItems:
-        if item.get('completed'):
-            doneLists.append(item)
-            done += 1
-
-    s = 'is done with tasks'
-    e = 'Employee'
-    print('{} {} {}({}/{}):'.format(e, employeeName, s, done, len(todosItems)))
-
-    for item in doneLists:
-        print('\t{}'.format(item['title']))
+if __name__ == "__main__":
+    if len(argv) > 1:
+        user = argv[1]
+        url = "https://jsonplaceholder.typicode.com/"
+        req = requests.get("{}users/{}".format(url, user))
+        name = req.json().get("name")
+        if name is not None:
+            j_req = requests.get(
+                "{}todos?userId={}".format(
+                    url, user)).json()
+            all_tasks = len(j_req)
+            completed_tasks = []
+            for t in j_req:
+                if t.get("completed") is True:
+                    completed_tasks.append(t)
+            count = len(completed_tasks)
+            print("Employee {} is done with tasks({}/{}):"
+                  .format(name, count, all_tasks))
+            for title in completed_tasks:
+                print("\t {}".format(title.get("title")))
